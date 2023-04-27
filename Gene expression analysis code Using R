@@ -1,0 +1,86 @@
+#-----Gene expression analysis code------------------------
+library(graphics)
+library(stats)
+library(ggplot2)
+library(readxl)
+
+datatoheatmap1=read_excel("D:/Research/Research_files _mainly 121 seqs/Data files/id_expressions.xlsx")
+matrix_data1 <- as.matrix(datatoheatmap1[, -1])
+matrix_data1
+rownames(matrix_data1) <- datatoheatmap1[, 1]
+
+# Perform k-means clustering
+set.seed(123)
+k1 <- 10
+# number of clusters
+kmeans_result1 <- kmeans(matrix_data1, centers = k1)
+
+cluster_labels1 <- kmeans_result1$cluster
+
+library(pheatmap)
+pheatmap(matrix_data1, clustering_distance_rows = "euclidean",
+         clustering_method = "ward.D2",
+         cluster_rows = TRUE,
+         color = colorRampPalette(c("red", "yellow", "green"))(100),
+         row_colors = cluster_labels1)
+
+
+#-------------------------------------------------------------------------------
+datatoheatmap2=read_excel("D:/Research/Research_files _mainly 121 seqs/Data files/1493 expression.xlsx", sheet="Sheet1")
+matrix_data2 <- as.matrix(datatoheatmap2[, -1])
+matrix_data2
+rownames(matrix_data2) <- datatoheatmap2[, 1]
+
+# Perform k-means clustering
+set.seed(123)
+k2 <- 2
+# number of clusters
+kmeans_result2 <- kmeans(matrix_data2, centers = k2)
+
+cluster_labels2 <- kmeans_result2$cluster
+# Add the cluster assignments to the data frame
+data$cluster <- factor(clusters$cluster)
+
+# Plot the parallel coordinate plots for each cluster
+ggparcoord(data, columns=3:ncol(data), groupColumn="cluster", alphaLines=0.5, scale="uniminmax") +
+  scale_color_discrete(name="Cluster") +
+  theme_bw()
+#----------------Parallel cordinates plots for gene clusters -------------------
+# Cluster the data using k-means
+data1=read_excel("D:/Research/Research_files _mainly 121 seqs/Data files/1493 expression.xlsx", sheet="Sheet1")
+
+k <- 2
+set.seed(123) # for reproducibility
+clusters <- kmeans(data1[,2:ncol(data)], k)
+
+library(GGally)
+# Add the cluster assignments to the data frame
+data1$cluster <- factor(clusters$cluster)
+data1
+
+# Plot the parallel coordinate plots for each cluster
+p12=ggparcoord(data1, columns=2:9, groupColumn="cluster", alphaLines=0.5, scale="uniminmax", shadeBox = NULL) +
+  theme_bw()
+p12=p12+scale_color_manual(values=c("#006600", "#3399FF"))
+p12
+
+#--------------------- for both separetely ----------------------------------------------------
+
+clus1=data1[data1$cluster==1,]
+clus2=data1[data1$cluster==2,]
+clus1$mean = apply(clus1[,-1],1,mean)
+clus2$mean = apply(clus2[,-1],1,mean)
+
+p1=ggparcoord(clus1, columns=2:9, groupColumn="cluster", alphaLines=0.5, scale="uniminmax", shadeBox = NULL) +
+  theme_bw()
+p1=p1+scale_color_manual(values=c("#006600"))
+
+p1=p1+xlab("Expression location")
+p1
+p2=ggparcoord(clus2, columns=2:8, groupColumn="cluster", alphaLines=0.5, scale="uniminmax", shadeBox = NULL) + 
+  geom_line(aes(y=mean(clus2$mean)), linetype="dashed", color="black", size=6) +
+  theme_bw()
+p2=p2+scale_color_manual(values=c("#3399FF"))
+p2
+p2=p2+xlab("Expression location")
+p2
