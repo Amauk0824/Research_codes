@@ -1,0 +1,34 @@
+
+datatoheatmap1=read_excel("D:/Research/Research_files _mainly 121 seqs/Data files/id_expressions.xlsx")
+datatoheatmap1 = data.frame(datatoheatmap1)
+datatoheatmap1 =datatoheatmap1[order(datatoheatmap1$Gene.Identifier),]
+row.names(datatoheatmap1) <-datatoheatmap1$X
+datatoheatmap1=datatoheatmap1[1:121,-1]
+datatoheatmap1=data.matrix(datatoheatmap1)
+datatoheatmap1
+
+if (!requireNamespace("BiocManager", quietly = TRUE))
+  install.packages("BiocManager")
+BiocManager::install("ComplexHeatmap")
+
+library(dendextend)
+row_dend1 = hclust(dist(datatoheatmap1)) # row clustering
+col_dend1 = hclust(dist(t(datatoheatmap1))) # column clustering
+
+library(ComplexHeatmap)
+hm11=Heatmap(datatoheatmap1, 
+            name = "Gene expressions(Log2FC)",
+            clustering_distance_rows = "k-means",
+            color_space = (c("green", "black","orange", "red"))(100),
+            #= colorRampPalette(c("green", "black","orange", "red"))(100),
+            row_dend_width = unit(75, "mm"),
+            column_dend_height = unit(16, "mm"),
+            show_row_names = FALSE,
+            col=colorRamp2(breaks = c(0, 4, 8), 
+                           colors = c("green", "black", "red")),
+            cluster_rows = color_branches(row_dend1, k = 2, col=c("black","dark red")),
+            cluster_columns = color_branches(col_dend1, k = 2, col=c("black","dark red")),
+            column_title = "Expression Locations", row_title = "Genes",
+            row_names_gp = gpar(fontsize = 7) # Text size for row names
+)
+hm11
