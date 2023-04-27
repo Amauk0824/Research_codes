@@ -1,0 +1,27 @@
+#------toplological metrices for PPI network----------------
+import networkx as nx
+import pandas as pd
+
+gqfs=nx.Graph()
+gqfs.add_node('STRG0015ULR.Pn12.388 ')
+gqfs.add_node('STRG0015ULR.Pn12.1459 ')
+gqfs.add_node('STRG0015ULR.Pn3.2354 ')
+gqfs.add_node('STRG0015ULR.Pn5.528 ')
+#...continue nodes
+print("Nodes :", gqfs.nodes())
+print("Edges",gqfs.edges())
+
+# calculate degree of each node
+degrees_q150 = nx.degree(gqfs)
+print("Node degrees:", degrees_q150)
+# calculate between centrality
+bc_q150 = nx.betweenness_centrality(gqfs)
+print("Betweenness centrality:", bc_q150)
+# calculate clustering coeffivient of each node
+cc_q150 = nx.clustering(gqfs)
+print("Clustering coefficient:", cc_q150)
+dfq= pd.DataFrame({'Node': list(gqfs.nodes()), 'Degree': dict(degrees_q150).values(),
+                   'Betweenness centrality': list(bc_q150.values()),
+                   'Clustering coefficient':list(cc_q150.values())})
+dfq.to_csv('Networkx_properties_query_1stshell.csv', index=False)
+print(dfq)
