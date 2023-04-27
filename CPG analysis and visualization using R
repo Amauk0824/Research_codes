@@ -1,0 +1,47 @@
+# ---------------------CPG analysis and visualization ------------------------------
+library(Biostrings)
+
+# Read in the multifasta gene file
+gene_seqs <- readDNAStringSet("D:/Research/selected promoter.fasta")
+# Define a function to calculate the CpG O/E ratio
+cpg_oe_ratio <- function(seq) {
+  # Count the number of CpG dinucleotides
+  cpg_count <- sum(countPattern("CG", seq))
+  
+  # Count the number of C and G nucleotides
+  c_count <- sum(countPattern("C", seq))
+  g_count <- sum(countPattern("G", seq))
+  
+  # Calculate the expected number of CpG dinucleotides
+  cpg_exp_count <- (c_count * g_count) / nchar(seq)
+  
+  # Calculate the CpG O/E ratio
+  cpg_oe_ratio <- cpg_count / cpg_exp_count
+  
+  return(cpg_oe_ratio)
+}
+
+# Loop over each gene sequence and calculate the CpG O/E ratio
+cpg_ratios <- numeric(length(gene_seqs))
+for (i in seq_along(gene_seqs)) {
+  cpg_ratios[i] <- cpg_oe_ratio(gene_seqs[[i]])
+}
+
+# Identify CpG islands using a threshold CpG O/E ratio of 0.6
+cpg_islands <- which(cpg_ratios > 0.6)
+# Print the results
+ycat1= cat(paste0("Found ", length(cpg_islands), " CpG islands\n"))
+cat(paste0("CpG O/E ratios:\n", cpg_ratios[cpg_islands], "\n"))
+cat(paste0("Gene names:\n", names(gene_seqs)[cpg_islands], "\n"))
+
+# Load the ggplot2 package
+library(ggplot2)
+# Create a data frame with the CpG O/E ratios and gene names
+cpg_df <- data.frame(CpG_OE_Ratio = cpg_ratios, Gene_Name = names(gene_seqs))
+# Create a scatter plot of CpG O/E ratios vs. gene names
+ggplot(cpg_df, aes(x = Gene_Name, y = CpG_OE_Ratio)) +
+  geom_point(size = 1.3, color = "steelblue") +
+  theme(axis.text.x = element_blank(),
+        axis.title.x = element_blank()) +
+  labs(title = "Scatter plot of the distribution of CpG Islands in forward strand sequences",
+       y = "CpG O/E Ratio", x="Gene sequences")
